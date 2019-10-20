@@ -10,6 +10,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.6.4",
+    "@babel/node": "^7.6.3",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/preset-env": "^7.6.3",
     "@babel/preset-react": "^7.6.3",
@@ -26,7 +27,7 @@
   "scripts": {
     "start": "concurrently npm:start:front npm:start:back",
     "start:front": "cross-env webpack-dev-server",
-    "start:back": "cross-env API_PORT=3000 nodemon server/index.js"
+    "start:back": "cross-env USE_IN_MEMORY_DB=true API_PORT=3000 nodemon --exec babel-node server/index.js"
   },
   "repository": {
     "type": "git",

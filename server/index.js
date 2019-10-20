@@ -1,13 +1,17 @@
-const json = require('koa-json')
-const Koa = require('koa')
-const app = new Koa()
+import json from 'koa-json'
+import Koa from 'koa'
+import { initDatabase } from './database.js'
 
-app.use(json())
+async function main() {
+  const db = await initDatabase()
+  const app = new Koa()
+  app.use(json())
 
-app.use((ctx) => {
-  ctx.body = { foo: 'qwe' }
-})
+  app.listen(process.env.API_PORT, async () => {
+    console.log(`Server started, listenting to :${process.env.API_PORT}`)
+  });
+}
 
-app.listen(process.env.API_PORT, async () => {
-  console.log(`Server started, listenting to :${process.env.API_PORT}`)
-});
+main()
+
+
