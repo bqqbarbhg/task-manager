@@ -8,6 +8,6 @@ app.use((ctx) => {
   ctx.body = { foo: 'qwe' }
 })
 
-app.listen(process.env.API_PORT, () => {
+app.listen(process.env.API_PORT, async () => {
   console.log(`Server started, listenting to :${process.env.API_PORT}`)
 });
