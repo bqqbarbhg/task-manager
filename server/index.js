@@ -5,8 +5,9 @@ const app = new Koa()
 app.use(json())
 
 app.use((ctx) => {
-  ctx.body = { foo: 'bar' }
+  ctx.body = { foo: 'qwe' }
 })
 
-
-app.listen(process.env.API_PORT);
+app.listen(process.env.API_PORT, () => {
+  console.log(`Server started, listenting to :${process.env.API_PORT}`)
+});
