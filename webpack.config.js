@@ -7,7 +7,10 @@ module.exports = {
     path: path.join(__dirname, 'client'),
   },
   devServer: {
-    contentBase: path.join(__dirname, 'client')
+    contentBase: path.join(__dirname, 'client'),
+    proxy: {
+      '/api': 'http://localhost:3000'
+    }
   },
   module: {
     rules: [

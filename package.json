@@ -3,7 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "dependencies": {},
+  "dependencies": {
+    "koa": "^2.10.0",
+    "koa-json": "^2.0.2"
+  },
   "devDependencies": {
     "@babel/core": "^7.6.4",
     "@babel/preset-env": "^7.6.3",
@@ -16,7 +19,9 @@
     "webpack-dev-server": "^3.8.2"
   },
   "scripts": {
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server",
+    "start:front": "webpack-dev-server",
+    "start:back": "API_PORT=3000 node server/index.js"
   },
   "repository": {
     "type": "git",
