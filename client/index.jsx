@@ -99,7 +99,9 @@ class TaskList extends React.Component {
   }
 
   render() {
-    const num = this.state.numVisibleTasks
+    // HACK: We keep the number of tasks in state but it might be outdated
+    // by the time we get here so better to use the canonical value instead...
+    const num = getNumVisibleTasks()
     return <div>
       <VirtualList
         width="100%"
