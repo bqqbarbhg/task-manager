@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
-import { getNumVisibleTasks, getVisibleTask, registerOnVisibleTasksChanged, initTasks } from './tasks'
+import { getNumVisibleTasks, getVisibleTask, registerOnVisibleTasksChanged, getRootTask, initTasks } from './tasks'
 import { dbInitialize, dbGetTaskChildren, dbUpdate } from './db'
 import VirtualList from 'react-tiny-virtual-list'
 
@@ -21,7 +21,7 @@ class Task extends React.Component {
   render() {
     const { task, style } = this.props
     return <div style={style}>
-        <span>{">".repeat(task.level + 1)}</span>
+        <span>{">".repeat(task.level)}</span>
         <button onClick={task.toggleOpen}>{ task.opened ? "-" : "+" }</button>
         <span>{task.name}</span>
         <span> {task.id}</span>
@@ -45,10 +45,10 @@ function debugSetOpenAllImp(task, open) {
 }
 
 function debugOpenAll() {
-  debugSetOpenAllImp(getVisibleTask(0), true) // TODO: getRootTask()
+  debugSetOpenAllImp(getRootTask(), true)
 }
 function debugCloseAll() {
-  debugSetOpenAllImp(getVisibleTask(0), false) // TODO: getRootTask()
+  debugSetOpenAllImp(getRootTask(), false)
 }
 
 let g_numUpdatePrevTimeMs = 0

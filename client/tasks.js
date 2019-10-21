@@ -34,13 +34,14 @@ class Task {
         this.id = id
         this.parent = parent
         this.level = level
+        if (parent === null) this.numVisibleItems = 0
 
         this.reloadChildren = this.reloadChildren.bind(this)
         this.toggleOpen = this.toggleOpen.bind(this)
     }
 
     updateNumVisible() {
-        let num = 1
+        let num = this.parent !== null ? 1 : 0
         if (this.opened) {
             for (let child of this.children) {
                 num += child.numVisibleItems
@@ -57,6 +58,7 @@ class Task {
 
     setOpen(open) {
         if (this.opened === open) return
+        if (this.parent === null && open == false) return
         this.opened = open
         taskOpened[this.id] = open
 
@@ -98,8 +100,10 @@ let rootTask = new Task("root", null, 0)
 let tasksById = { "root": rootTask }
 
 function getVisibleTaskImp(task, localIndex) {
-    if (localIndex === 0) return task
-    localIndex--
+    if (task.parent !== null) {
+        if (localIndex === 0) return task
+        localIndex--
+    }
     for (const child of task.children) {
         if (localIndex < child.numVisibleItems) {
             return getVisibleTaskImp(child, localIndex)
@@ -124,6 +128,10 @@ export function registerOnVisibleTasksChanged(callback) {
 
 export function initTasks() {
     rootTask.setOpen(true)
+}
+
+export function getRootTask() {
+    return rootTask
 }
 
 if (/* DEBUG */ true) {
