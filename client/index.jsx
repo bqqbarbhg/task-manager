@@ -56,11 +56,22 @@ let g_numCloseUpdatesInARow = 0
 let g_numVisibleTasks = 0
 let g_numUpdateTimeout = null
 
+let g_scrollTop = 0
+
+try {
+  g_scrollTop = JSON.parse(sessionStorage.scrollOffset)
+} catch (err) { /* Nop */ }
+
+function taskListScroll(scrollTop) {
+  g_scrollTop = scrollTop
+}
+
 class TaskList extends React.Component {
 
   constructor(props) {
     super(props)
     this.state = { numVisibleTasks: 1 }
+    this.firstRender = true
 
     this.updateNumVisibleTasks = this.updateNumVisibleTasks.bind(this)
   }
@@ -102,6 +113,13 @@ class TaskList extends React.Component {
     // HACK: We keep the number of tasks in state but it might be outdated
     // by the time we get here so better to use the canonical value instead...
     const num = getNumVisibleTasks()
+
+    let scrollOffset = undefined
+    if (this.firstRender) {
+      this.firstRender = false
+      scrollOffset = g_scrollTop
+    }
+
     return <div>
       <VirtualList
         width="100%"
@@ -109,6 +127,8 @@ class TaskList extends React.Component {
         itemCount={num}
         itemSize={28}
         renderItem={renderTask}
+        onScroll={taskListScroll}
+        scrollOffset={scrollOffset}
       />
       <div>Open tasks: {num}</div>
       <div>
@@ -126,7 +146,15 @@ async function init() {
   await dbUpdate()
   initTasks()
 
-  ReactDOM.render(<TaskList />, document.querySelector('#root'))
+  // Need to wait for current tasks to open (+ race vs timeout)
+  window.setTimeout(() => {
+    ReactDOM.render(<TaskList />, document.querySelector('#root'))
+  }, 100)
 }
 
 init()
+
+// TODO: Centralize these?
+window.addEventListener("beforeunload", () => {
+    sessionStorage.setItem("scrollOffset", JSON.stringify(g_scrollTop))
+})
