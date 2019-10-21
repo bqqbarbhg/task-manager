@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
-import { getNumVisibleTasks, getVisibleTask, registerOnVisibleTasksChanged } from './tasks'
+import { getNumVisibleTasks, getVisibleTask, registerOnVisibleTasksChanged, initTasks } from './tasks'
 import { dbInitialize, dbGetTaskChildren, dbUpdate } from './db'
+import VirtualList from 'react-tiny-virtual-list'
 
 function identity() { }
 
@@ -10,6 +11,7 @@ class Task extends React.Component {
   constructor(props) {
     super(props)
     this.refresh = this.forceUpdate.bind(this)
+    props.task.onRefresh = this.refresh
   }
 
   componentWillUnmount() {
@@ -17,17 +19,36 @@ class Task extends React.Component {
   }
 
   render() {
-    const { task } = this.props
-    task.onRefresh = this.refresh
-    return <><tr>
-      <td>
-        {">".repeat(task.level + 1)}
+    const { task, style } = this.props
+    return <div style={style}>
+        <span>{">".repeat(task.level + 1)}</span>
         <button onClick={task.toggleOpen}>{ task.opened ? "-" : "+" }</button>
         <span>{task.name}</span>
-      </td>
-      <td>{task.id}</td>
-    </tr></>
+        <span> {task.id}</span>
+    </div>
   }
+}
+
+function renderTask({index, style}) {
+  const task = getVisibleTask(index)
+
+  return <Task task={task} style={style} key={task.id}></Task>
+}
+
+function debugSetOpenAllImp(task, open) {
+  if (task.opened) {
+    for (const child of task.children) {
+      debugSetOpenAllImp(child, open)
+    }
+  }
+  task.setOpen(open)
+}
+
+function debugOpenAll() {
+  debugSetOpenAllImp(getVisibleTask(0), true) // TODO: getRootTask()
+}
+function debugCloseAll() {
+  debugSetOpenAllImp(getVisibleTask(0), false) // TODO: getRootTask()
 }
 
 class TaskList extends React.Component {
@@ -48,14 +69,21 @@ class TaskList extends React.Component {
   }
 
   render() {
-
     const num = this.state.numVisibleTasks
-    let tasks = []
-    for (let i = 0; i < num; i++) {
-      const task = getVisibleTask(i)
-      tasks.push(<Task task={task} key={i}></Task>)
-    }
-    return <table>{tasks}</table>
+    return <div>
+      <VirtualList
+        width="100%"
+        height={600}
+        itemCount={num}
+        itemSize={28}
+        renderItem={renderTask}
+      />
+      <div>Open tasks: {num}</div>
+      <div>
+        <button onClick={debugOpenAll}>Open all !</button>
+        <button onClick={debugCloseAll}>Close all !</button>
+      </div>
+    </div>
 
   }
 
@@ -64,6 +92,7 @@ class TaskList extends React.Component {
 async function init() {
   await dbInitialize()
   await dbUpdate()
+  initTasks()
 
   ReactDOM.render(<TaskList />, document.querySelector('#root'))
 }

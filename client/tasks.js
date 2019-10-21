@@ -3,6 +3,7 @@ import { dbGetTaskChildren } from "./db";
 function identity() { }
 
 let onVisibleTasksChanged = identity
+let taskOpened = { }
 
 function updateVisibleChildren(task, numVisibleChildren) {
 }
@@ -57,6 +58,7 @@ class Task {
     setOpen(open) {
         if (this.opened === open) return
         this.opened = open
+        taskOpened[this.id] = open
 
         this.updateNumVisible()
 
@@ -85,6 +87,10 @@ class Task {
         })
         this.childrenLoaded = true
         this.updateNumVisible()
+
+        for (const child of this.children) {
+            if (taskOpened[child.id]) child.setOpen(true)
+        }
     }
 }
 
@@ -116,7 +122,19 @@ export function registerOnVisibleTasksChanged(callback) {
     onVisibleTasksChanged = callback
 }
 
+export function initTasks() {
+    rootTask.setOpen(true)
+}
+
 if (/* DEBUG */ true) {
     window.rootTask = rootTask
     window.tasksById = tasksById
+
+    // Maybe not DEBUG?
+    window.addEventListener("beforeunload", () => {
+        sessionStorage.setItem("openTasks", JSON.stringify(taskOpened))
+    })
+
+    taskOpened = JSON.parse(sessionStorage.getItem("openTasks") || "{}")
+    window.taskOpened = taskOpened
 }
