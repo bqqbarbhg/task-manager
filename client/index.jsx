@@ -51,16 +51,46 @@ function debugCloseAll() {
   debugSetOpenAllImp(getVisibleTask(0), false) // TODO: getRootTask()
 }
 
+let g_numUpdatePrevTimeMs = 0
+let g_numCloseUpdatesInARow = 0
+let g_numVisibleTasks = 0
+let g_numUpdateTimeout = null
+
 class TaskList extends React.Component {
 
   constructor(props) {
     super(props)
     this.state = { numVisibleTasks: 1 }
+
+    this.updateNumVisibleTasks = this.updateNumVisibleTasks.bind(this)
+  }
+
+  updateNumVisibleTasks() {
+    this.setState({ numVisibleTasks: g_numVisibleTasks })
+    g_numUpdateTimeout = null
+
+    // Set previous update time to prevent pulsing N updates in a row when thottled
+    g_numUpdatePrevTimeMs = Date.now()
   }
 
   componentDidMount() {
     registerOnVisibleTasksChanged((num) => {
-      this.setState({ numVisibleTasks: num })
+      g_numVisibleTasks = num
+      if (g_numUpdateTimeout) return
+
+      const timeMs = Date.now()
+      if (g_numUpdatePrevTimeMs + 100.0 >= timeMs) {
+        g_numCloseUpdatesInARow++
+      } else {
+        g_numCloseUpdatesInARow = 0
+      }
+      g_numUpdatePrevTimeMs = timeMs
+
+      if (g_numCloseUpdatesInARow < 5) {
+        this.updateNumVisibleTasks()
+      } else {
+        g_numUpdateTimeout = window.setTimeout(this.updateNumVisibleTasks, 100)
+      }
     })
   }
 
