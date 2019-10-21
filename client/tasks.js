@@ -1,8 +1,8 @@
 import { dbGetTaskChildren } from "./db";
 
-function identity() { }
+function noop() { }
 
-let onVisibleTasksChanged = identity
+let onVisibleTasksChanged = noop
 let taskOpened = { }
 
 function getTaskInstance(id, parent) {
@@ -25,7 +25,7 @@ class Task {
     opened = false
     numVisibleItems = 1
     childrenLoaded = false
-    onRefresh = identity
+    onRefresh = noop
 
     constructor(id, parent, level) {
         this.id = id

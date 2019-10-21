@@ -4,7 +4,7 @@ import { getNumVisibleTasks, getVisibleTask, registerOnVisibleTasksChanged, getR
 import { dbInitialize, dbGetTaskChildren, dbUpdate } from './db'
 import VirtualList from 'react-tiny-virtual-list'
 
-function identity() { }
+function noop() { }
 
 class Task extends React.Component {
 
@@ -15,7 +15,7 @@ class Task extends React.Component {
   }
 
   componentWillUnmount() {
-    this.props.task.onRefresh = identity
+    this.props.task.onRefresh = noop
   }
 
   render() {
