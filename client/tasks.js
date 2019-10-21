@@ -1,4 +1,4 @@
-import { dbGetTaskChildren } from "./db";
+import { dbGetTaskChildren, dbGetTaskTree } from "./db";
 
 function noop() { }
 
@@ -78,7 +78,6 @@ class Task {
   }
   
   reloadChildren(children) {
-    const prevNumChildren = this.children.length
     this.children = children.map((data) => {
       const task = getTaskInstance(data.id, this)
       task.name = data.name
@@ -93,8 +92,8 @@ class Task {
   }
 }
 
-let rootTask = new Task("root", null, 0)
-let tasksById = { "root": rootTask }
+let rootTask = new Task(1, null, 0)
+let tasksById = { '1': rootTask }
 
 function getVisibleTaskImp(task, localIndex) {
   if (task.parent !== null) {
@@ -129,6 +128,13 @@ export function initTasks() {
 
 export function getRootTask() {
   return rootTask
+}
+
+export async function openTaskTreeById(taskId) {
+  const tree = await dbGetTaskTree(taskId)
+  for (const id of tree) {
+    taskOpened[id] = true
+  }
 }
 
 if (/* DEBUG */ true) {

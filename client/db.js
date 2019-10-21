@@ -33,6 +33,12 @@ export function dbInitialize() {
 }
 
 export function dbGetTaskChildren(taskId) {
+
+  /*
+  return fetch(`http://localhost:3000/task/${taskId}/children`)
+    .then(r => r.json())
+    */
+
   return new Promise((resolve, reject) => {
     const tx = db.transaction("tasks")
     const tasks = tx.objectStore("tasks")
@@ -43,6 +49,27 @@ export function dbGetTaskChildren(taskId) {
       resolve(children.result)
     }
   })
+}
+
+export async function dbGetTaskTree(taskId) {
+
+  const data = await fetch(`http://localhost:3000/task/${taskId}/tree`).then(r => r.json())
+  const parentId = {}
+
+  const tx = db.transaction(["tasks"], "readwrite")
+  const tasks = tx.objectStore("tasks")
+  for (const task of data) {
+    parentId[task.id] = task.parent
+    tasks.put(task)
+  }
+
+  tx.commit()
+
+  let tree = []
+  for (let t = taskId; t > 0; t = parentId[t]) {
+    tree.push(t)
+  }
+  return tree
 }
 
 async function dbUpdateImp(revision) {
@@ -58,6 +85,8 @@ async function dbUpdateImp(revision) {
   }
   
   info.put({ name: "revision", revision: data.revision })
+
+  tx.commit()
 }
 
 export async function dbUpdate() {

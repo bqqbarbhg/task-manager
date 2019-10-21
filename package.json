@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "@koa/cors": "^3.0.0",
     "koa": "^2.10.0",
     "koa-json": "^2.0.2",
+    "koa-router": "^7.4.0",
     "react-tiny-virtual-list": "^2.2.0",
     "sqlite3": "^4.1.0"
   },

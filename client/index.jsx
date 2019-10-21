@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import ReactDOM from 'react-dom'
-import { getNumVisibleTasks, getVisibleTask, registerOnVisibleTasksChanged, getRootTask, initTasks } from './tasks'
+import { getNumVisibleTasks, getVisibleTask, registerOnVisibleTasksChanged, getRootTask, initTasks, openTaskTreeById } from './tasks'
 import { dbInitialize, dbGetTaskChildren, dbUpdate } from './db'
 import VirtualList from 'react-tiny-virtual-list'
 
@@ -144,6 +144,9 @@ class TaskList extends React.Component {
 async function init() {
   await dbInitialize()
   await dbUpdate()
+
+  await openTaskTreeById(7)
+
   initTasks()
 
   // Need to wait for current tasks to open (+ race vs timeout)

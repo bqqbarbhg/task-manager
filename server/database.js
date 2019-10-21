@@ -9,7 +9,7 @@ export async function initDatabase() {
 
   const databaseFile = process.env.USE_IN_MEMORY_DB === 'true'
     ? ':memory:'
-    : path.resolve(__dirname, 'db.sqlite')
+    : path.resolve(__dirname, 'db-sqlite3.sqlite')
 
   console.log(`Using ${databaseFile} as database file.`)
 
@@ -18,27 +18,34 @@ export async function initDatabase() {
     return new sqlite.Database(databaseFile)
   }
 
+  let foundDbFile = false
   if (databaseFile !== ':memory:') {
     // Touch the database file
-    console.log('Creating database file.')
-    fs.closeSync(fs.openSync(databaseFile, 'w'))
+    if (fs.existsSync(databaseFile)) {
+      foundDbFile = true
+    } else {
+      console.log(`Creating database file: ${databaseFile}`)
+      fs.closeSync(fs.openSync(databaseFile, 'w'))
+    }
   }
 
   const database = new sqlite.Database(databaseFile)
 
-  console.log('Initializing database schema.')
+  if (!foundDbFile) {
+    console.log('Initializing database schema.')
 
-  // Read database schema file and run it
-  const schema = fs.readFileSync(path.resolve(__dirname, 'schema.sql')).toString()
-  await new Promise((resolve, reject) => database.exec(schema, (err, res) => {
-    if (err) {
-      reject(err)
-    } else {
-      resolve (res)
-    }
-  }))
+    // Read database schema file and run it
+    const schema = fs.readFileSync(path.resolve(__dirname, 'schema.sql')).toString()
+    await new Promise((resolve, reject) => database.exec(schema, (err, res) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve (res)
+      }
+    }))
 
-  console.log('Database schema initialized.')
+    console.log('Database schema initialized.')
+  }
 
   return database
 }
