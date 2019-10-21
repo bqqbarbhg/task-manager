@@ -5,9 +5,6 @@ function identity() { }
 let onVisibleTasksChanged = identity
 let taskOpened = { }
 
-function updateVisibleChildren(task, numVisibleChildren) {
-}
-
 function getTaskInstance(id, parent) {
     let task = tasksById[id]
     if (task !== undefined) {
